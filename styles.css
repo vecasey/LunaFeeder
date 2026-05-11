@@ -1,0 +1,137 @@
+:root {
+  color-scheme: dark;
+  color: #f8f8f2;
+  background: #0f172a;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 24px;
+}
+
+.app-shell {
+  width: min(1080px, 100%);
+  display: grid;
+  gap: 20px;
+}
+
+header {
+  text-align: center;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+h1,
+h2 {
+  margin: 0 0 12px;
+}
+
+p {
+  margin: 0;
+  line-height: 1.7;
+  color: #cbd5e1;
+}
+
+.card {
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.field-row,
+.checkbox-row {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+label {
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: #38bdf8;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #22d3ee;
+}
+
+.result-text {
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(30, 41, 59, 0.85);
+  color: #f8fafc;
+  line-height: 1.6;
+}
+
+.brand-details,
+.brand-grid {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.brand-card p {
+  margin-bottom: 16px;
+}
+
+.brand-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.brand-tile {
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.brand-tile h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.brand-tile p {
+  margin: 4px 0;
+  color: #cbd5e1;
+  font-size: 0.93rem;
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 16px;
+  }
+}

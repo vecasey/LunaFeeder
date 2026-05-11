@@ -34,17 +34,20 @@ const foodBrands = [
 ];
 
 const brandSelect = document.getElementById("brand");
+const wetBrandSelect = document.getElementById("wetBrand");
 const servingType = document.getElementById("servingType");
+const wetServingType = document.getElementById("wetServingType");
+const wetAmountInput = document.getElementById("wetAmount");
 const resultText = document.getElementById("resultText");
 const brandDetails = document.getElementById("brandDetails");
 const brandGrid = document.getElementById("brandGrid");
 
-function populateBrandSelect() {
+function populateBrandSelect(selectElement) {
   foodBrands.forEach((brand) => {
     const option = document.createElement("option");
     option.value = brand.name;
     option.textContent = brand.name;
-    brandSelect.appendChild(option);
+    selectElement.appendChild(option);
   });
 }
 
@@ -107,6 +110,18 @@ function calculateFoodAmounts(brand, caloriesNeeded, servingTypeValue) {
   return { amount: formatNumber(servings), label: unitLabel };
 }
 
+function calculateWetCalories(brand, amount, servingTypeValue) {
+  if (!brand || amount <= 0) return 0;
+  switch (servingTypeValue) {
+    case "can":
+      return amount * brand.caloriesPerCan;
+    case "pouch":
+      return amount * brand.caloriesPerPouch;
+    default:
+      return 0;
+  }
+}
+
 function updateResult(event) {
   event.preventDefault();
   const gender = document.getElementById("gender").value;
@@ -116,40 +131,66 @@ function updateResult(event) {
   const selectedBrand = foodBrands.find((brand) => brand.name === selectedBrandName);
   const active = document.getElementById("isActive").checked;
   const servingTypeValue = servingType.value;
+  const wetBrandName = wetBrandSelect.value;
+  const wetBrand = foodBrands.find((brand) => brand.name === wetBrandName);
+  const wetServingTypeValue = wetServingType.value;
+  const wetAmount = Number(wetAmountInput.value);
 
   if (!selectedBrand || currentWeight <= 0 || goalWeight <= 0) {
-    resultText.textContent = "Please enter valid weights and choose a food brand.";
+    resultText.textContent = "Please enter valid weights and choose a dry food brand.";
     return;
   }
 
   const { currentCalories, goalCalories } = getCalorieTarget(currentWeight, goalWeight, active);
-  const foodAmount = calculateFoodAmounts(selectedBrand, goalCalories, servingTypeValue);
+  const wetCalories = calculateWetCalories(wetBrand, wetAmount, wetServingTypeValue);
+  const remainingCalories = Math.max(goalCalories - wetCalories, 0);
+  const dryFoodAmount = calculateFoodAmounts(selectedBrand, remainingCalories, servingTypeValue);
+  const wetSummary = wetAmount > 0 && wetBrand ? `Wet food: ${wetAmount} ${wetServingTypeValue} of ${wetBrand.name} (${formatNumber(wetCalories)} kcal)` : "No wet food entered.";
 
   const planType = currentWeight > goalWeight ? "weight loss" : currentWeight < goalWeight ? "weight gain" : "maintenance";
   const genderPhrase = gender === "male" ? "male cat" : "female cat";
 
+  let dryMessage = `Feed about <strong>${dryFoodAmount.amount} ${dryFoodAmount.label}</strong> of ${selectedBrandName} per day.`;
+  if (remainingCalories === 0 && wetCalories > 0) {
+    dryMessage = "The wet food already covers the target calories, so no additional dry food is needed today.";
+  }
+  if (wetCalories > goalCalories) {
+    dryMessage = `Wet food already exceeds the calorie goal by <strong>${formatNumber(wetCalories - goalCalories)} kcal</strong>. No dry food is needed, and consider reducing the wet amount.`;
+  }
+
   resultText.innerHTML = `
-    <p>For a <strong>${genderPhrase}</strong> currently weighing <strong>${currentWeight} lbs</strong> with a goal of <strong>${goalWeight} lbs</strong>:</p>
+    <p>For a <strong>${genderPhrase}</strong> weighing <strong>${currentWeight} lbs</strong> with a goal of <strong>${goalWeight} lbs</strong>:</p>
     <ul>
-      <li>Estimated daily calories for ${planType}: <strong>${goalCalories} kcal</strong></li>
-      <li>Maintenance-level calories at current weight: <strong>${currentCalories} kcal</strong></li>
-      <li>Selected food: <strong>${selectedBrandName}</strong></li>
-      <li>Feed about <strong>${foodAmount.amount} ${foodAmount.label}</strong> per day</li>
+      <li>Estimated daily goal calories: <strong>${goalCalories} kcal</strong></li>
+      <li>Maintenance-level calories: <strong>${currentCalories} kcal</strong></li>
+      <li>${wetSummary}</li>
+      <li>${dryMessage}</li>
     </ul>
     <p>Use this as a guide and adjust slowly. Check with a veterinarian for a personalized plan.</p>
   `;
 
-  brandDetails.innerHTML = `
+  const dryBrandDetail = `
     <div class="brand-tile">
-      <h3>${selectedBrand.name} details</h3>
+      <h3>${selectedBrand.name} dry food details</h3>
       <p><strong>Calories per cup:</strong> ${selectedBrand.caloriesPerCup}</p>
       <p><strong>Calories per can:</strong> ${selectedBrand.caloriesPerCan}</p>
       <p><strong>Calories per pouch:</strong> ${selectedBrand.caloriesPerPouch}</p>
     </div>
   `;
+
+  const wetBrandDetail = wetAmount > 0 && wetBrand ? `
+    <div class="brand-tile">
+      <h3>${wetBrand.name} wet food details</h3>
+      <p><strong>Calories per can:</strong> ${wetBrand.caloriesPerCan}</p>
+      <p><strong>Calories per pouch:</strong> ${wetBrand.caloriesPerPouch}</p>
+    </div>
+  ` : "";
+
+  brandDetails.innerHTML = dryBrandDetail + wetBrandDetail;
 }
 
-populateBrandSelect();
+populateBrandSelect(brandSelect);
+populateBrandSelect(wetBrandSelect);
 renderBrandGrid();
 
 document.getElementById("calculatorForm").addEventListener("submit", updateResult);
